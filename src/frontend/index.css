@@ -1,0 +1,286 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@font-face {
+  font-family: "Bricolage Grotesque";
+  src: url("/assets/fonts/BricolageGrotesque[opsz,wdth,wght].woff2") format("woff2");
+  font-weight: 100 900;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Plus Jakarta Sans";
+  src: url("/assets/fonts/PlusJakartaSans[wght].woff2") format("woff2");
+  font-weight: 200 800;
+  font-display: swap;
+}
+
+@layer base {
+  :root {
+    --radius: 0.5rem;
+
+    /* Navy/Teal palette tokens */
+    --navy: 0.22 0.065 228;
+    --navy-dark: 0.16 0.055 232;
+    --teal: 0.48 0.11 205;
+    --teal-light: 0.72 0.10 200;
+    --gold: 0.78 0.18 75;
+    --gold-light: 0.90 0.10 85;
+    --status-menunggu: 0.80 0.18 85;
+    --status-diproses: 0.58 0.14 230;
+    --status-didistribusikan: 0.65 0.16 150;
+
+    /* Shadcn semantic tokens — mapped to navy/teal palette */
+    --background: 0.97 0.008 220;
+    --foreground: 0.18 0.04 228;
+    --card: 1 0 0;
+    --card-foreground: 0.18 0.04 228;
+    --popover: 1 0 0;
+    --popover-foreground: 0.18 0.04 228;
+    --primary: 0.22 0.065 228;
+    --primary-foreground: 0.97 0.008 220;
+    --secondary: 0.92 0.02 220;
+    --secondary-foreground: 0.22 0.065 228;
+    --muted: 0.94 0.01 220;
+    --muted-foreground: 0.50 0.04 228;
+    --accent: 0.90 0.04 210;
+    --accent-foreground: 0.22 0.065 228;
+    --destructive: 0.577 0.245 27.325;
+    --destructive-foreground: 0.985 0 0;
+    --border: 0.88 0.02 220;
+    --input: 0.88 0.02 220;
+    --ring: 0.48 0.11 205;
+
+    /* Chart colors */
+    --chart-1: 0.78 0.18 75;
+    --chart-2: 0.48 0.11 205;
+    --chart-3: 0.65 0.16 150;
+    --chart-4: 0.58 0.14 230;
+    --chart-5: 0.72 0.10 200;
+
+    /* Sidebar */
+    --sidebar: 0.22 0.065 228;
+    --sidebar-foreground: 0.95 0.01 210;
+    --sidebar-primary: 0.78 0.18 75;
+    --sidebar-primary-foreground: 0.22 0.065 228;
+    --sidebar-accent: 0.28 0.07 228;
+    --sidebar-accent-foreground: 0.95 0.01 210;
+    --sidebar-border: 0.30 0.07 228;
+    --sidebar-ring: 0.48 0.11 205;
+  }
+
+  .dark {
+    --background: 0.14 0.04 228;
+    --foreground: 0.95 0.01 210;
+    --card: 0.18 0.05 228;
+    --card-foreground: 0.95 0.01 210;
+    --popover: 0.20 0.055 228;
+    --popover-foreground: 0.95 0.01 210;
+    --primary: 0.78 0.18 75;
+    --primary-foreground: 0.14 0.04 228;
+    --secondary: 0.25 0.06 228;
+    --secondary-foreground: 0.95 0.01 210;
+    --muted: 0.25 0.06 228;
+    --muted-foreground: 0.65 0.04 220;
+    --accent: 0.30 0.07 228;
+    --accent-foreground: 0.95 0.01 210;
+    --destructive: 0.704 0.191 22.216;
+    --destructive-foreground: 0.985 0 0;
+    --border: 1 0 0 / 10%;
+    --input: 1 0 0 / 15%;
+    --ring: 0.48 0.11 205;
+    --sidebar: 0.18 0.05 228;
+    --sidebar-foreground: 0.95 0.01 210;
+    --sidebar-primary: 0.78 0.18 75;
+    --sidebar-primary-foreground: 0.14 0.04 228;
+    --sidebar-accent: 0.25 0.06 228;
+    --sidebar-accent-foreground: 0.95 0.01 210;
+    --sidebar-border: 1 0 0 / 10%;
+    --sidebar-ring: 0.48 0.11 205;
+  }
+
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    font-family: "Plus Jakarta Sans", "Segoe UI", system-ui, sans-serif;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  }
+}
+
+@layer components {
+  .font-display {
+    font-family: "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  }
+
+  .bg-navy {
+    background-color: oklch(0.22 0.065 228);
+  }
+
+  .bg-navy-dark {
+    background-color: oklch(0.16 0.055 232);
+  }
+
+  .bg-teal {
+    background-color: oklch(0.48 0.11 205);
+  }
+
+  .text-gold {
+    color: oklch(0.78 0.18 75);
+  }
+
+  .text-navy {
+    color: oklch(0.22 0.065 228);
+  }
+
+  .text-teal {
+    color: oklch(0.48 0.11 205);
+  }
+
+  .border-navy {
+    border-color: oklch(0.22 0.065 228);
+  }
+
+  .border-gold {
+    border-color: oklch(0.78 0.18 75);
+  }
+
+  .shadow-navy {
+    box-shadow: 0 2px 8px oklch(0.22 0.065 228 / 0.4);
+  }
+
+  .shadow-navy-lg {
+    box-shadow: 0 4px 20px oklch(0.22 0.065 228 / 0.35);
+  }
+
+  .btn-gold {
+    background-color: oklch(0.78 0.18 75);
+    color: oklch(0.16 0.055 232);
+    font-weight: 600;
+    transition: all 0.2s ease;
+  }
+
+  .btn-gold:hover {
+    background-color: oklch(0.72 0.20 75);
+  }
+
+  .status-menunggu {
+    background-color: oklch(0.94 0.06 85);
+    color: oklch(0.55 0.18 75);
+    border: 1px solid oklch(0.82 0.12 80);
+  }
+
+  .status-diproses {
+    background-color: oklch(0.92 0.04 230);
+    color: oklch(0.38 0.14 230);
+    border: 1px solid oklch(0.76 0.09 225);
+  }
+
+  .status-didistribusikan {
+    background-color: oklch(0.92 0.05 150);
+    color: oklch(0.40 0.14 150);
+    border: 1px solid oklch(0.76 0.09 148);
+  }
+
+  .nav-link {
+    color: oklch(0.90 0.01 210);
+    transition: color 0.2s ease;
+    font-size: 0.875rem;
+    font-weight: 500;
+  }
+
+  .nav-link:hover,
+  .nav-link.active {
+    color: oklch(0.78 0.18 75);
+  }
+
+  .hero-gradient {
+    background: linear-gradient(
+      135deg,
+      oklch(0.16 0.055 232) 0%,
+      oklch(0.22 0.065 228) 40%,
+      oklch(0.28 0.08 220) 70%,
+      oklch(0.32 0.09 215) 100%
+    );
+  }
+
+  .section-divider {
+    border-color: oklch(0.88 0.02 220);
+  }
+
+  .table-row-hover:hover {
+    background-color: oklch(0.94 0.02 220);
+  }
+}
+
+@media print {
+  header, nav, footer, .no-print { display: none !important; }
+  .print-only { display: block !important; }
+  body { background: white !important; color: black !important; }
+  .recharts-wrapper { display: none !important; }
+  .rekap-charts-row { display: none !important; }
+  .rekap-status-chart { display: none !important; }
+
+  .print-header {
+    display: block !important;
+    margin-bottom: 1.5rem;
+    border-bottom: 2px solid #1a2e4a;
+    padding-bottom: 1rem;
+  }
+
+  .print-header h1 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #1a2e4a;
+    margin: 0 0 0.25rem;
+  }
+
+  .print-header p {
+    font-size: 0.875rem;
+    color: #555;
+    margin: 0;
+  }
+
+  .rekap-stats-cards {
+    display: grid !important;
+    grid-template-columns: repeat(4, 1fr) !important;
+    gap: 0.75rem !important;
+    margin-bottom: 1.5rem !important;
+  }
+
+  .rekap-stats-cards > * {
+    border: 1px solid #ccc !important;
+    border-radius: 6px !important;
+    padding: 0.75rem !important;
+    background: white !important;
+    box-shadow: none !important;
+  }
+
+  table {
+    width: 100% !important;
+    border-collapse: collapse !important;
+  }
+
+  th, td {
+    border: 1px solid #ccc !important;
+    padding: 0.5rem 0.75rem !important;
+    color: black !important;
+    background: white !important;
+  }
+
+  th {
+    background-color: #f0f4f8 !important;
+    font-weight: 600 !important;
+  }
+
+  * {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+}
