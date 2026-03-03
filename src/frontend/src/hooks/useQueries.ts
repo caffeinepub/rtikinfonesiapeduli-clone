@@ -333,9 +333,10 @@ export function useIsAdmin() {
   const { actor } = useActor();
   return useMutation({
     mutationFn: async (password: string) => {
-      if (!actor) throw new Error("No actor");
+      if (!actor) throw new Error("Koneksi ke server belum siap");
       return actor.isAdmin(password);
     },
+    retry: false,
   });
 }
 

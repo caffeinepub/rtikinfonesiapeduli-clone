@@ -8,10 +8,11 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useActor } from "@/hooks/useActor";
 import { useIsAdmin } from "@/hooks/useQueries";
 import { useNavigate } from "@tanstack/react-router";
-import { Eye, EyeOff, LogIn, Shield } from "lucide-react";
-import { useState } from "react";
+import { Eye, EyeOff, Loader2, LogIn, Shield } from "lucide-react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
 export default function AdminLogin() {
@@ -19,11 +20,23 @@ export default function AdminLogin() {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const isAdminMutation = useIsAdmin();
+  const { actor, isFetching } = useActor();
+
+  useEffect(() => {
+    if (sessionStorage.getItem("rtik_admin")) {
+      navigate({ to: "/admin-panel" });
+    }
+  }, [navigate]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!password) {
       toast.error("Masukkan password admin");
+      return;
+    }
+
+    if (!actor) {
+      toast.error("Koneksi ke server belum siap. Mohon tunggu sebentar.");
       return;
     }
 
@@ -101,11 +114,19 @@ export default function AdminLogin() {
               <Button
                 type="submit"
                 className="w-full bg-navy text-white hover:bg-navy-dark"
-                disabled={isAdminMutation.isPending}
+                disabled={isAdminMutation.isPending || isFetching || !actor}
                 data-ocid="admin.login.submit_button"
               >
-                {isAdminMutation.isPending ? (
-                  "Memverifikasi..."
+                {isFetching ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Menghubungkan...
+                  </>
+                ) : isAdminMutation.isPending ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Memverifikasi...
+                  </>
                 ) : (
                   <>
                     <LogIn className="w-4 h-4 mr-2" />
