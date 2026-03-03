@@ -227,6 +227,44 @@
   .rekap-charts-row { display: none !important; }
   .rekap-status-chart { display: none !important; }
 
+  /* Penerima Bantuan PDF overlay: when visible, hide everything else */
+  body:has(#penerima-rekap-overlay) > *:not(#penerima-rekap-overlay) {
+    display: none !important;
+  }
+
+  #penerima-rekap-overlay {
+    position: static !important;
+    overflow: visible !important;
+    padding: 0 !important;
+    background: white !important;
+    display: block !important;
+  }
+
+  #penerima-rekap-overlay table {
+    width: 100% !important;
+    border-collapse: collapse !important;
+    font-size: 11px !important;
+  }
+
+  #penerima-rekap-overlay th,
+  #penerima-rekap-overlay td {
+    border: 1px solid #ccc !important;
+    padding: 5px 8px !important;
+  }
+
+  #penerima-rekap-overlay th {
+    background-color: #1a2e4a !important;
+    color: #ffffff !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  #penerima-rekap-overlay tr:nth-child(even) td {
+    background-color: #f8fafc !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
   .print-header {
     display: block !important;
     margin-bottom: 1.5rem;

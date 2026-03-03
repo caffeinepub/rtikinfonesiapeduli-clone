@@ -74,7 +74,6 @@ export function Header() {
                 Login Admin
               </Button>
             </Link>
-
             {/* Mobile hamburger */}
             <button
               type="button"

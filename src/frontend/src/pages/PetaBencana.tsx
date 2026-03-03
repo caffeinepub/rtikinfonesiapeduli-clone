@@ -9,21 +9,10 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
+import { loadLeaflet } from "@/hooks/useLeaflet";
 import { useGetAllPenerimaBantuan } from "@/hooks/useQueries";
-import L from "leaflet";
-import "leaflet/dist/leaflet.css";
 import { Filter, MapPin, Search } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
-
-// Fix default marker icons for Leaflet with bundlers
-(L.Icon.Default.prototype as unknown as Record<string, unknown>)._getIconUrl =
-  undefined;
-L.Icon.Default.mergeOptions({
-  iconRetinaUrl:
-    "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png",
-  iconUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
-  shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
-});
 
 // Color per status
 function getMarkerColor(status: string): string {
@@ -35,23 +24,6 @@ function getMarkerColor(status: string): string {
     default:
       return "#d97706";
   }
-}
-
-function createColoredIcon(color: string) {
-  return L.divIcon({
-    className: "",
-    html: `<div style="
-      width: 24px; height: 24px;
-      background: ${color};
-      border: 3px solid white;
-      border-radius: 50% 50% 50% 0;
-      transform: rotate(-45deg);
-      box-shadow: 0 2px 6px rgba(0,0,0,0.3);
-    "></div>`,
-    iconSize: [24, 24],
-    iconAnchor: [12, 24],
-    popupAnchor: [0, -26],
-  });
 }
 
 // Default coordinates for known Indonesian cities (fallback)
@@ -91,7 +63,6 @@ function getCoords(
   lng?: number,
 ): [number, number] | null {
   if (lat && lng && lat !== 0 && lng !== 0) return [lat, lng];
-  // Try direct match or partial match
   const directMatch = WILAYAH_COORDS[wilayah];
   if (directMatch) return directMatch;
   const partialKey = Object.keys(WILAYAH_COORDS).find((k) =>
@@ -115,38 +86,53 @@ interface PenerimaItem {
   sudahDivalidasi: boolean;
 }
 
+interface LeafletMap {
+  remove(): void;
+}
+interface LeafletMarker {
+  remove(): void;
+}
+
 function MapComponent({ items }: { items: PenerimaItem[] }) {
   const mapRef = useRef<HTMLDivElement>(null);
-  const leafletMapRef = useRef<L.Map | null>(null);
-  const markersRef = useRef<L.Marker[]>([]);
+  const leafletMapRef = useRef<LeafletMap | null>(null);
+  const markersRef = useRef<LeafletMarker[]>([]);
 
   useEffect(() => {
     if (!mapRef.current) return;
     if (leafletMapRef.current) return;
 
-    const map = L.map(mapRef.current, {
-      center: [-2.5, 118.0],
-      zoom: 5,
-      zoomControl: true,
+    loadLeaflet().then((L) => {
+      if (!mapRef.current || leafletMapRef.current) return;
+
+      const map = L.map(mapRef.current, {
+        center: [-2.5, 118.0],
+        zoom: 5,
+        zoomControl: true,
+      });
+
+      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        attribution:
+          '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+        maxZoom: 18,
+      }).addTo(map);
+
+      leafletMapRef.current = map;
     });
 
-    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-      attribution:
-        '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-      maxZoom: 18,
-    }).addTo(map);
-
-    leafletMapRef.current = map;
-
     return () => {
-      map.remove();
-      leafletMapRef.current = null;
+      if (leafletMapRef.current) {
+        leafletMapRef.current.remove();
+        leafletMapRef.current = null;
+      }
     };
   }, []);
 
   useEffect(() => {
     const map = leafletMapRef.current;
-    if (!map) return;
+    if (!map || !window.L) return;
+
+    const L = window.L;
 
     // Remove old markers
     for (const m of markersRef.current) {
@@ -163,13 +149,27 @@ function MapComponent({ items }: { items: PenerimaItem[] }) {
       const coords = getCoords(p.wilayah, p.koordinatLat, p.koordinatLng);
       if (!coords) continue;
 
-      // Add small jitter to avoid perfect overlap
       const jitter: [number, number] = [
         coords[0] + (Math.random() - 0.5) * 0.02,
         coords[1] + (Math.random() - 0.5) * 0.02,
       ];
 
-      const icon = createColoredIcon(getMarkerColor(p.status));
+      const color = getMarkerColor(p.status);
+      const icon = L.divIcon({
+        className: "",
+        html: `<div style="
+          width: 24px; height: 24px;
+          background: ${color};
+          border: 3px solid white;
+          border-radius: 50% 50% 50% 0;
+          transform: rotate(-45deg);
+          box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+        "></div>`,
+        iconSize: [24, 24],
+        iconAnchor: [12, 24],
+        popupAnchor: [0, -26],
+      });
+
       const marker = L.marker(jitter, { icon })
         .bindPopup(
           `<div style="min-width:180px; font-family:sans-serif; font-size:13px;">

@@ -67,13 +67,21 @@ export type Status__1 = { 'diproses' : null } |
   { 'menunggu' : null } |
   { 'didistribusikan' : null };
 export interface T {
+  'alamat' : string,
+  'deskripsi' : string,
+  'email' : string,
+  'telepon' : string,
+  'namaOrganisasi' : string,
+  'copyright' : string,
+}
+export interface T__1 {
   'id' : bigint,
   'aktif' : boolean,
   'nama' : string,
   'email' : string,
   'wilayah' : string,
 }
-export interface T__1 {
+export interface T__2 {
   'id' : bigint,
   'penulis' : string,
   'tanggal' : string,
@@ -83,7 +91,7 @@ export interface T__1 {
   'gambarUrl' : string,
   'konten' : string,
 }
-export interface T__2 {
+export interface T__3 {
   'id' : bigint,
   'status' : Status,
   'topik' : Topik,
@@ -94,7 +102,7 @@ export interface T__2 {
   'catatan' : string,
   'kontak' : string,
 }
-export interface T__3 {
+export interface T__4 {
   'id' : bigint,
   'status' : Status__1,
   'sudahDivalidasi' : boolean,
@@ -110,7 +118,7 @@ export interface T__3 {
   'keperluanBantuan' : string,
   'catatan' : string,
 }
-export interface T__4 {
+export interface T__5 {
   'id' : bigint,
   'linkLabel' : string,
   'linkUrl' : string,
@@ -183,20 +191,22 @@ export interface _SERVICE {
   'deletePengaduan' : ActorMethod<[bigint], undefined>,
   'deletePublikasi' : ActorMethod<[bigint], undefined>,
   'deleteValidator' : ActorMethod<[bigint], undefined>,
-  'getAllFooterLinks' : ActorMethod<[], Array<T__4>>,
-  'getAllPenerimaBantuan' : ActorMethod<[], Array<T__3>>,
-  'getAllPengaduan' : ActorMethod<[], Array<T__2>>,
-  'getAllPublikasi' : ActorMethod<[], Array<T__1>>,
-  'getAllValidators' : ActorMethod<[], Array<T>>,
-  'getFooterLinkById' : ActorMethod<[bigint], T__4>,
-  'getPenerimaBantuanById' : ActorMethod<[bigint], T__3>,
-  'getPenerimaBantuanByJenis' : ActorMethod<[string], Array<T__3>>,
-  'getPenerimaBantuanByStatus' : ActorMethod<[Status__1], Array<T__3>>,
-  'getPengaduanById' : ActorMethod<[bigint], T__2>,
-  'getPublikasiById' : ActorMethod<[bigint], T__1>,
-  'getValidatorById' : ActorMethod<[bigint], T>,
+  'getAllFooterLinks' : ActorMethod<[], Array<T__5>>,
+  'getAllPenerimaBantuan' : ActorMethod<[], Array<T__4>>,
+  'getAllPengaduan' : ActorMethod<[], Array<T__3>>,
+  'getAllPublikasi' : ActorMethod<[], Array<T__2>>,
+  'getAllValidators' : ActorMethod<[], Array<T__1>>,
+  'getFooterInfo' : ActorMethod<[], T>,
+  'getFooterLinkById' : ActorMethod<[bigint], T__5>,
+  'getPenerimaBantuanById' : ActorMethod<[bigint], T__4>,
+  'getPenerimaBantuanByJenis' : ActorMethod<[string], Array<T__4>>,
+  'getPenerimaBantuanByStatus' : ActorMethod<[Status__1], Array<T__4>>,
+  'getPengaduanById' : ActorMethod<[bigint], T__3>,
+  'getPublikasiById' : ActorMethod<[bigint], T__2>,
+  'getValidatorById' : ActorMethod<[bigint], T__1>,
   'isAdmin' : ActorMethod<[string], boolean>,
   'seedSampleData' : ActorMethod<[], undefined>,
+  'updateFooterInfo' : ActorMethod<[T], undefined>,
   'updateFooterLink' : ActorMethod<[UpdateInput__4], undefined>,
   'updatePenerimaBantuan' : ActorMethod<[UpdateInput__3], undefined>,
   'updatePengaduan' : ActorMethod<[UpdateInput__2], undefined>,

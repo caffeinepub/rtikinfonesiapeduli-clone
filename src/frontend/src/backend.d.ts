@@ -29,13 +29,10 @@ export interface UpdateInput__1 {
 }
 export interface T__1 {
     id: bigint;
-    penulis: string;
-    tanggal: string;
-    ringkasan: string;
-    judul: string;
-    kategori: string;
-    gambarUrl: string;
-    konten: string;
+    aktif: boolean;
+    nama: string;
+    email: string;
+    wilayah: string;
 }
 export interface CreateInput__2 {
     id: bigint;
@@ -56,9 +53,19 @@ export interface UpdateInput__4 {
 }
 export interface T__4 {
     id: bigint;
-    linkLabel: string;
-    linkUrl: string;
-    order: bigint;
+    status: Status__1;
+    sudahDivalidasi: boolean;
+    jenisBantuan: string;
+    koordinatLat: number;
+    koordinatLng: number;
+    alamat: string;
+    jumlahBantuan: bigint;
+    tanggal: string;
+    nama: string;
+    wilayah: string;
+    validatorId?: string;
+    keperluanBantuan: string;
+    catatan: string;
 }
 export interface UpdateInput__2 {
     id: bigint;
@@ -80,19 +87,14 @@ export interface UpdateInput {
 }
 export interface T__3 {
     id: bigint;
-    status: Status__1;
-    sudahDivalidasi: boolean;
-    jenisBantuan: string;
-    koordinatLat: number;
-    koordinatLng: number;
-    alamat: string;
-    jumlahBantuan: bigint;
+    status: Status;
+    topik: Topik;
     tanggal: string;
     nama: string;
-    wilayah: string;
-    validatorId?: string;
-    keperluanBantuan: string;
+    judul: string;
+    deskripsi: string;
     catatan: string;
+    kontak: string;
 }
 export interface CreateInput__3 {
     id: bigint;
@@ -112,21 +114,21 @@ export interface CreateInput__3 {
 }
 export interface T__2 {
     id: bigint;
-    status: Status;
-    topik: Topik;
+    penulis: string;
     tanggal: string;
-    nama: string;
+    ringkasan: string;
     judul: string;
-    deskripsi: string;
-    catatan: string;
-    kontak: string;
+    kategori: string;
+    gambarUrl: string;
+    konten: string;
 }
 export interface T {
-    id: bigint;
-    aktif: boolean;
-    nama: string;
+    alamat: string;
+    deskripsi: string;
     email: string;
-    wilayah: string;
+    telepon: string;
+    namaOrganisasi: string;
+    copyright: string;
 }
 export interface UpdateInput__3 {
     id: bigint;
@@ -144,18 +146,24 @@ export interface UpdateInput__3 {
     keperluanBantuan: string;
     catatan: string;
 }
-export interface CreateInput {
+export interface T__5 {
     id: bigint;
-    aktif: boolean;
-    nama: string;
-    email: string;
-    wilayah: string;
+    linkLabel: string;
+    linkUrl: string;
+    order: bigint;
 }
 export interface CreateInput__4 {
     id: bigint;
     linkLabel: string;
     linkUrl: string;
     order: bigint;
+}
+export interface CreateInput {
+    id: bigint;
+    aktif: boolean;
+    nama: string;
+    email: string;
+    wilayah: string;
 }
 export enum Status {
     diproses = "diproses",
@@ -186,20 +194,22 @@ export interface backendInterface {
     deletePengaduan(id: bigint): Promise<void>;
     deletePublikasi(id: bigint): Promise<void>;
     deleteValidator(id: bigint): Promise<void>;
-    getAllFooterLinks(): Promise<Array<T__4>>;
-    getAllPenerimaBantuan(): Promise<Array<T__3>>;
-    getAllPengaduan(): Promise<Array<T__2>>;
-    getAllPublikasi(): Promise<Array<T__1>>;
-    getAllValidators(): Promise<Array<T>>;
-    getFooterLinkById(id: bigint): Promise<T__4>;
-    getPenerimaBantuanById(id: bigint): Promise<T__3>;
-    getPenerimaBantuanByJenis(jenis: string): Promise<Array<T__3>>;
-    getPenerimaBantuanByStatus(status: Status__1): Promise<Array<T__3>>;
-    getPengaduanById(id: bigint): Promise<T__2>;
-    getPublikasiById(id: bigint): Promise<T__1>;
-    getValidatorById(id: bigint): Promise<T>;
+    getAllFooterLinks(): Promise<Array<T__5>>;
+    getAllPenerimaBantuan(): Promise<Array<T__4>>;
+    getAllPengaduan(): Promise<Array<T__3>>;
+    getAllPublikasi(): Promise<Array<T__2>>;
+    getAllValidators(): Promise<Array<T__1>>;
+    getFooterInfo(): Promise<T>;
+    getFooterLinkById(id: bigint): Promise<T__5>;
+    getPenerimaBantuanById(id: bigint): Promise<T__4>;
+    getPenerimaBantuanByJenis(jenis: string): Promise<Array<T__4>>;
+    getPenerimaBantuanByStatus(status: Status__1): Promise<Array<T__4>>;
+    getPengaduanById(id: bigint): Promise<T__3>;
+    getPublikasiById(id: bigint): Promise<T__2>;
+    getValidatorById(id: bigint): Promise<T__1>;
     isAdmin(password: string): Promise<boolean>;
     seedSampleData(): Promise<void>;
+    updateFooterInfo(info: T): Promise<void>;
     updateFooterLink(input: UpdateInput__4): Promise<void>;
     updatePenerimaBantuan(input: UpdateInput__3): Promise<void>;
     updatePengaduan(input: UpdateInput__2): Promise<void>;

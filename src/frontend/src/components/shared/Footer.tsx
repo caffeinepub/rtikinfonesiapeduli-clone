@@ -1,4 +1,4 @@
-import { useGetAllFooterLinks } from "@/hooks/useQueries";
+import { useGetAllFooterLinks, useGetFooterInfo } from "@/hooks/useQueries";
 import { Link } from "@tanstack/react-router";
 import { Heart, Mail, MapPin, Phone, Shield } from "lucide-react";
 
@@ -13,6 +13,7 @@ const navLinks = [
 
 export function Footer() {
   const { data: footerLinks } = useGetAllFooterLinks();
+  const { data: footerInfo } = useGetFooterInfo();
   const currentYear = new Date().getFullYear();
   const hostname =
     typeof window !== "undefined" ? window.location.hostname : "";
@@ -37,9 +38,8 @@ export function Footer() {
               </div>
             </div>
             <p className="text-sm text-white/60 leading-relaxed">
-              Sistem Informasi RTIK Indonesia Peduli untuk data penerima bantuan
-              bencana. Transparansi dan akuntabilitas dalam pengelolaan bantuan
-              bencana.
+              {footerInfo?.deskripsi ??
+                "Sistem Informasi RTIK Indonesia Peduli untuk data penerima bantuan bencana. Transparansi dan akuntabilitas dalam pengelolaan bantuan bencana."}
             </p>
           </div>
 
@@ -128,15 +128,17 @@ export function Footer() {
             <div className="space-y-3">
               <div className="flex items-start gap-2 text-sm text-white/60">
                 <MapPin className="w-4 h-4 mt-0.5 flex-shrink-0 text-gold/70" />
-                <span>Badan Penanggulangan Bencana Daerah</span>
+                <span>
+                  {footerInfo?.alamat ?? "Badan Penanggulangan Bencana Daerah"}
+                </span>
               </div>
               <div className="flex items-center gap-2 text-sm text-white/60">
                 <Phone className="w-4 h-4 flex-shrink-0 text-gold/70" />
-                <span>119 / 021-500-454</span>
+                <span>{footerInfo?.telepon ?? "119 / 021-500-454"}</span>
               </div>
               <div className="flex items-center gap-2 text-sm text-white/60">
                 <Mail className="w-4 h-4 flex-shrink-0 text-gold/70" />
-                <span>info@rtik.or.id</span>
+                <span>{footerInfo?.email ?? "info@rtik.or.id"}</span>
               </div>
             </div>
           </div>
@@ -145,7 +147,9 @@ export function Footer() {
         {/* Bottom */}
         <div className="mt-10 pt-6 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-white/40">
           <span>
-            © {currentYear} RTIK Indonesia Peduli. Hak cipta dilindungi.
+            © {currentYear}{" "}
+            {footerInfo?.copyright ??
+              "RTIK Indonesia Peduli. Hak cipta dilindungi."}
           </span>
           <span>
             Built with <Heart className="inline w-3 h-3 text-gold/70" /> using{" "}

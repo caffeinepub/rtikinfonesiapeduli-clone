@@ -62,17 +62,21 @@ export default function Validasi() {
     <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       {/* Header */}
       <div className="mb-8">
-        <div className="flex items-center gap-2 text-muted-foreground text-sm mb-2">
-          <UserCheck className="w-4 h-4" />
-          <span>Validasi</span>
+        <div className="flex items-start justify-between gap-4">
+          <div>
+            <div className="flex items-center gap-2 text-muted-foreground text-sm mb-2">
+              <UserCheck className="w-4 h-4" />
+              <span>Validasi</span>
+            </div>
+            <h1 className="font-display text-3xl font-bold text-foreground">
+              Validasi Data
+            </h1>
+            <p className="text-muted-foreground mt-2">
+              Verifikasi data penerima bantuan oleh tim relawan RTIK Indonesia
+              Peduli.
+            </p>
+          </div>
         </div>
-        <h1 className="font-display text-3xl font-bold text-foreground">
-          Validasi Data
-        </h1>
-        <p className="text-muted-foreground mt-2">
-          Verifikasi data penerima bantuan oleh tim relawan RTIK Indonesia
-          Peduli.
-        </p>
       </div>
 
       {/* Stats */}

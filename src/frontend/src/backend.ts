@@ -111,13 +111,10 @@ export interface UpdateInput__1 {
 }
 export interface T__1 {
     id: bigint;
-    penulis: string;
-    tanggal: string;
-    ringkasan: string;
-    judul: string;
-    kategori: string;
-    gambarUrl: string;
-    konten: string;
+    aktif: boolean;
+    nama: string;
+    email: string;
+    wilayah: string;
 }
 export interface CreateInput__2 {
     id: bigint;
@@ -138,9 +135,19 @@ export interface UpdateInput__4 {
 }
 export interface T__4 {
     id: bigint;
-    linkLabel: string;
-    linkUrl: string;
-    order: bigint;
+    status: Status__1;
+    sudahDivalidasi: boolean;
+    jenisBantuan: string;
+    koordinatLat: number;
+    koordinatLng: number;
+    alamat: string;
+    jumlahBantuan: bigint;
+    tanggal: string;
+    nama: string;
+    wilayah: string;
+    validatorId?: string;
+    keperluanBantuan: string;
+    catatan: string;
 }
 export interface UpdateInput__2 {
     id: bigint;
@@ -162,19 +169,14 @@ export interface UpdateInput {
 }
 export interface T__3 {
     id: bigint;
-    status: Status__1;
-    sudahDivalidasi: boolean;
-    jenisBantuan: string;
-    koordinatLat: number;
-    koordinatLng: number;
-    alamat: string;
-    jumlahBantuan: bigint;
+    status: Status;
+    topik: Topik;
     tanggal: string;
     nama: string;
-    wilayah: string;
-    validatorId?: string;
-    keperluanBantuan: string;
+    judul: string;
+    deskripsi: string;
     catatan: string;
+    kontak: string;
 }
 export interface CreateInput__3 {
     id: bigint;
@@ -194,21 +196,21 @@ export interface CreateInput__3 {
 }
 export interface T__2 {
     id: bigint;
-    status: Status;
-    topik: Topik;
+    penulis: string;
     tanggal: string;
-    nama: string;
+    ringkasan: string;
     judul: string;
-    deskripsi: string;
-    catatan: string;
-    kontak: string;
+    kategori: string;
+    gambarUrl: string;
+    konten: string;
 }
 export interface T {
-    id: bigint;
-    aktif: boolean;
-    nama: string;
+    alamat: string;
+    deskripsi: string;
     email: string;
-    wilayah: string;
+    telepon: string;
+    namaOrganisasi: string;
+    copyright: string;
 }
 export interface UpdateInput__3 {
     id: bigint;
@@ -226,18 +228,24 @@ export interface UpdateInput__3 {
     keperluanBantuan: string;
     catatan: string;
 }
-export interface CreateInput {
+export interface T__5 {
     id: bigint;
-    aktif: boolean;
-    nama: string;
-    email: string;
-    wilayah: string;
+    linkLabel: string;
+    linkUrl: string;
+    order: bigint;
 }
 export interface CreateInput__4 {
     id: bigint;
     linkLabel: string;
     linkUrl: string;
     order: bigint;
+}
+export interface CreateInput {
+    id: bigint;
+    aktif: boolean;
+    nama: string;
+    email: string;
+    wilayah: string;
 }
 export enum Status {
     diproses = "diproses",
@@ -268,27 +276,29 @@ export interface backendInterface {
     deletePengaduan(id: bigint): Promise<void>;
     deletePublikasi(id: bigint): Promise<void>;
     deleteValidator(id: bigint): Promise<void>;
-    getAllFooterLinks(): Promise<Array<T__4>>;
-    getAllPenerimaBantuan(): Promise<Array<T__3>>;
-    getAllPengaduan(): Promise<Array<T__2>>;
-    getAllPublikasi(): Promise<Array<T__1>>;
-    getAllValidators(): Promise<Array<T>>;
-    getFooterLinkById(id: bigint): Promise<T__4>;
-    getPenerimaBantuanById(id: bigint): Promise<T__3>;
-    getPenerimaBantuanByJenis(jenis: string): Promise<Array<T__3>>;
-    getPenerimaBantuanByStatus(status: Status__1): Promise<Array<T__3>>;
-    getPengaduanById(id: bigint): Promise<T__2>;
-    getPublikasiById(id: bigint): Promise<T__1>;
-    getValidatorById(id: bigint): Promise<T>;
+    getAllFooterLinks(): Promise<Array<T__5>>;
+    getAllPenerimaBantuan(): Promise<Array<T__4>>;
+    getAllPengaduan(): Promise<Array<T__3>>;
+    getAllPublikasi(): Promise<Array<T__2>>;
+    getAllValidators(): Promise<Array<T__1>>;
+    getFooterInfo(): Promise<T>;
+    getFooterLinkById(id: bigint): Promise<T__5>;
+    getPenerimaBantuanById(id: bigint): Promise<T__4>;
+    getPenerimaBantuanByJenis(jenis: string): Promise<Array<T__4>>;
+    getPenerimaBantuanByStatus(status: Status__1): Promise<Array<T__4>>;
+    getPengaduanById(id: bigint): Promise<T__3>;
+    getPublikasiById(id: bigint): Promise<T__2>;
+    getValidatorById(id: bigint): Promise<T__1>;
     isAdmin(password: string): Promise<boolean>;
     seedSampleData(): Promise<void>;
+    updateFooterInfo(info: T): Promise<void>;
     updateFooterLink(input: UpdateInput__4): Promise<void>;
     updatePenerimaBantuan(input: UpdateInput__3): Promise<void>;
     updatePengaduan(input: UpdateInput__2): Promise<void>;
     updatePublikasi(input: UpdateInput__1): Promise<void>;
     updateValidator(input: UpdateInput): Promise<void>;
 }
-import type { CreateInput__2 as _CreateInput__2, CreateInput__3 as _CreateInput__3, Status as _Status, Status__1 as _Status__1, T__2 as _T__2, T__3 as _T__3, Topik as _Topik, UpdateInput__2 as _UpdateInput__2, UpdateInput__3 as _UpdateInput__3 } from "./declarations/backend.did.d.ts";
+import type { CreateInput__2 as _CreateInput__2, CreateInput__3 as _CreateInput__3, Status as _Status, Status__1 as _Status__1, T__3 as _T__3, T__4 as _T__4, Topik as _Topik, UpdateInput__2 as _UpdateInput__2, UpdateInput__3 as _UpdateInput__3 } from "./declarations/backend.did.d.ts";
 export class Backend implements backendInterface {
     constructor(private actor: ActorSubclass<_SERVICE>, private _uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, private _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, private processError?: (error: unknown) => never){}
     async addFooterLink(arg0: CreateInput__4): Promise<void> {
@@ -431,7 +441,7 @@ export class Backend implements backendInterface {
             return result;
         }
     }
-    async getAllFooterLinks(): Promise<Array<T__4>> {
+    async getAllFooterLinks(): Promise<Array<T__5>> {
         if (this.processError) {
             try {
                 const result = await this.actor.getAllFooterLinks();
@@ -445,7 +455,7 @@ export class Backend implements backendInterface {
             return result;
         }
     }
-    async getAllPenerimaBantuan(): Promise<Array<T__3>> {
+    async getAllPenerimaBantuan(): Promise<Array<T__4>> {
         if (this.processError) {
             try {
                 const result = await this.actor.getAllPenerimaBantuan();
@@ -459,7 +469,7 @@ export class Backend implements backendInterface {
             return from_candid_vec_n11(this._uploadFile, this._downloadFile, result);
         }
     }
-    async getAllPengaduan(): Promise<Array<T__2>> {
+    async getAllPengaduan(): Promise<Array<T__3>> {
         if (this.processError) {
             try {
                 const result = await this.actor.getAllPengaduan();
@@ -473,7 +483,7 @@ export class Backend implements backendInterface {
             return from_candid_vec_n17(this._uploadFile, this._downloadFile, result);
         }
     }
-    async getAllPublikasi(): Promise<Array<T__1>> {
+    async getAllPublikasi(): Promise<Array<T__2>> {
         if (this.processError) {
             try {
                 const result = await this.actor.getAllPublikasi();
@@ -487,7 +497,7 @@ export class Backend implements backendInterface {
             return result;
         }
     }
-    async getAllValidators(): Promise<Array<T>> {
+    async getAllValidators(): Promise<Array<T__1>> {
         if (this.processError) {
             try {
                 const result = await this.actor.getAllValidators();
@@ -501,7 +511,21 @@ export class Backend implements backendInterface {
             return result;
         }
     }
-    async getFooterLinkById(arg0: bigint): Promise<T__4> {
+    async getFooterInfo(): Promise<T> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.getFooterInfo();
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.getFooterInfo();
+            return result;
+        }
+    }
+    async getFooterLinkById(arg0: bigint): Promise<T__5> {
         if (this.processError) {
             try {
                 const result = await this.actor.getFooterLinkById(arg0);
@@ -515,21 +539,21 @@ export class Backend implements backendInterface {
             return result;
         }
     }
-    async getPenerimaBantuanById(arg0: bigint): Promise<T__3> {
+    async getPenerimaBantuanById(arg0: bigint): Promise<T__4> {
         if (this.processError) {
             try {
                 const result = await this.actor.getPenerimaBantuanById(arg0);
-                return from_candid_T__3_n12(this._uploadFile, this._downloadFile, result);
+                return from_candid_T__4_n12(this._uploadFile, this._downloadFile, result);
             } catch (e) {
                 this.processError(e);
                 throw new Error("unreachable");
             }
         } else {
             const result = await this.actor.getPenerimaBantuanById(arg0);
-            return from_candid_T__3_n12(this._uploadFile, this._downloadFile, result);
+            return from_candid_T__4_n12(this._uploadFile, this._downloadFile, result);
         }
     }
-    async getPenerimaBantuanByJenis(arg0: string): Promise<Array<T__3>> {
+    async getPenerimaBantuanByJenis(arg0: string): Promise<Array<T__4>> {
         if (this.processError) {
             try {
                 const result = await this.actor.getPenerimaBantuanByJenis(arg0);
@@ -543,7 +567,7 @@ export class Backend implements backendInterface {
             return from_candid_vec_n11(this._uploadFile, this._downloadFile, result);
         }
     }
-    async getPenerimaBantuanByStatus(arg0: Status__1): Promise<Array<T__3>> {
+    async getPenerimaBantuanByStatus(arg0: Status__1): Promise<Array<T__4>> {
         if (this.processError) {
             try {
                 const result = await this.actor.getPenerimaBantuanByStatus(to_candid_Status__1_n3(this._uploadFile, this._downloadFile, arg0));
@@ -557,21 +581,21 @@ export class Backend implements backendInterface {
             return from_candid_vec_n11(this._uploadFile, this._downloadFile, result);
         }
     }
-    async getPengaduanById(arg0: bigint): Promise<T__2> {
+    async getPengaduanById(arg0: bigint): Promise<T__3> {
         if (this.processError) {
             try {
                 const result = await this.actor.getPengaduanById(arg0);
-                return from_candid_T__2_n18(this._uploadFile, this._downloadFile, result);
+                return from_candid_T__3_n18(this._uploadFile, this._downloadFile, result);
             } catch (e) {
                 this.processError(e);
                 throw new Error("unreachable");
             }
         } else {
             const result = await this.actor.getPengaduanById(arg0);
-            return from_candid_T__2_n18(this._uploadFile, this._downloadFile, result);
+            return from_candid_T__3_n18(this._uploadFile, this._downloadFile, result);
         }
     }
-    async getPublikasiById(arg0: bigint): Promise<T__1> {
+    async getPublikasiById(arg0: bigint): Promise<T__2> {
         if (this.processError) {
             try {
                 const result = await this.actor.getPublikasiById(arg0);
@@ -585,7 +609,7 @@ export class Backend implements backendInterface {
             return result;
         }
     }
-    async getValidatorById(arg0: bigint): Promise<T> {
+    async getValidatorById(arg0: bigint): Promise<T__1> {
         if (this.processError) {
             try {
                 const result = await this.actor.getValidatorById(arg0);
@@ -624,6 +648,20 @@ export class Backend implements backendInterface {
             }
         } else {
             const result = await this.actor.seedSampleData();
+            return result;
+        }
+    }
+    async updateFooterInfo(arg0: T): Promise<void> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.updateFooterInfo(arg0);
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.updateFooterInfo(arg0);
             return result;
         }
     }
@@ -704,10 +742,10 @@ function from_candid_Status__1_n14(_uploadFile: (file: ExternalBlob) => Promise<
 function from_candid_Status_n20(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: _Status): Status {
     return from_candid_variant_n21(_uploadFile, _downloadFile, value);
 }
-function from_candid_T__2_n18(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: _T__2): T__2 {
+function from_candid_T__3_n18(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: _T__3): T__3 {
     return from_candid_record_n19(_uploadFile, _downloadFile, value);
 }
-function from_candid_T__3_n12(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: _T__3): T__3 {
+function from_candid_T__4_n12(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: _T__4): T__4 {
     return from_candid_record_n13(_uploadFile, _downloadFile, value);
 }
 function from_candid_Topik_n22(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: _Topik): Topik {
@@ -830,11 +868,11 @@ function from_candid_variant_n23(_uploadFile: (file: ExternalBlob) => Promise<Ui
 }): Topik {
     return "lainnya" in value ? Topik.lainnya : "bantuan" in value ? Topik.bantuan : "pengungsian" in value ? Topik.pengungsian : "infrastruktur" in value ? Topik.infrastruktur : "bencana" in value ? Topik.bencana : "kesehatan" in value ? Topik.kesehatan : value;
 }
-function from_candid_vec_n11(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: Array<_T__3>): Array<T__3> {
-    return value.map((x)=>from_candid_T__3_n12(_uploadFile, _downloadFile, x));
+function from_candid_vec_n11(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: Array<_T__4>): Array<T__4> {
+    return value.map((x)=>from_candid_T__4_n12(_uploadFile, _downloadFile, x));
 }
-function from_candid_vec_n17(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: Array<_T__2>): Array<T__2> {
-    return value.map((x)=>from_candid_T__2_n18(_uploadFile, _downloadFile, x));
+function from_candid_vec_n17(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: Array<_T__3>): Array<T__3> {
+    return value.map((x)=>from_candid_T__3_n18(_uploadFile, _downloadFile, x));
 }
 function to_candid_CreateInput__2_n5(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: CreateInput__2): _CreateInput__2 {
     return to_candid_record_n6(_uploadFile, _downloadFile, value);

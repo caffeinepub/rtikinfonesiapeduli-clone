@@ -10,6 +10,7 @@ import type {
   T__2,
   T__3,
   T__4,
+  T__5,
   UpdateInput,
   UpdateInput__1,
   UpdateInput__2,
@@ -22,7 +23,7 @@ import { useActor } from "./useActor";
 
 export function useGetAllPenerimaBantuan() {
   const { actor, isFetching } = useActor();
-  return useQuery<T__3[]>({
+  return useQuery<T__4[]>({
     queryKey: ["penerimaBantuan"],
     queryFn: async () => {
       if (!actor) return [];
@@ -78,7 +79,7 @@ export function useDeletePenerimaBantuan() {
 
 export function useGetAllPengaduan() {
   const { actor, isFetching } = useActor();
-  return useQuery<T__2[]>({
+  return useQuery<T__3[]>({
     queryKey: ["pengaduan"],
     queryFn: async () => {
       if (!actor) return [];
@@ -134,7 +135,7 @@ export function useDeletePengaduan() {
 
 export function useGetAllPublikasi() {
   const { actor, isFetching } = useActor();
-  return useQuery<T__1[]>({
+  return useQuery<T__2[]>({
     queryKey: ["publikasi"],
     queryFn: async () => {
       if (!actor) return [];
@@ -190,7 +191,7 @@ export function useDeletePublikasi() {
 
 export function useGetAllFooterLinks() {
   const { actor, isFetching } = useActor();
-  return useQuery<T__4[]>({
+  return useQuery<T__5[]>({
     queryKey: ["footerLinks"],
     queryFn: async () => {
       if (!actor) return [];
@@ -246,7 +247,7 @@ export function useDeleteFooterLink() {
 
 export function useGetAllValidators() {
   const { actor, isFetching } = useActor();
-  return useQuery<T[]>({
+  return useQuery<T__1[]>({
     queryKey: ["validators"],
     queryFn: async () => {
       if (!actor) return [];
@@ -294,6 +295,34 @@ export function useDeleteValidator() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["validators"] });
+    },
+  });
+}
+
+// ─── Footer Info ─────────────────────────────────────────────────────────────
+
+export function useGetFooterInfo() {
+  const { actor, isFetching } = useActor();
+  return useQuery<T | null>({
+    queryKey: ["footerInfo"],
+    queryFn: async () => {
+      if (!actor) return null;
+      return actor.getFooterInfo();
+    },
+    enabled: !!actor && !isFetching,
+  });
+}
+
+export function useUpdateFooterInfo() {
+  const { actor } = useActor();
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (info: T) => {
+      if (!actor) throw new Error("No actor");
+      return actor.updateFooterInfo(info);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["footerInfo"] });
     },
   });
 }

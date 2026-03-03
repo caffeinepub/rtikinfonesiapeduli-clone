@@ -10,14 +10,14 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
+import { loadLeaflet } from "@/hooks/useLeaflet";
 import { useGetAllPenerimaBantuan } from "@/hooks/useQueries";
-import L from "leaflet";
-import "leaflet/dist/leaflet.css";
 import {
   CheckCircle,
   ChevronLeft,
   ChevronRight,
   Download,
+  FileText,
   Filter,
   List,
   Map as MapIcon,
@@ -27,16 +27,6 @@ import {
   XCircle,
 } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
-
-// Fix default marker icons for Leaflet with bundlers
-(L.Icon.Default.prototype as unknown as Record<string, unknown>)._getIconUrl =
-  undefined;
-L.Icon.Default.mergeOptions({
-  iconRetinaUrl:
-    "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png",
-  iconUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
-  shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
-});
 
 const PAGE_SIZE = 10;
 
@@ -97,23 +87,6 @@ function getMarkerColor(status: string): string {
   }
 }
 
-function createColoredIcon(color: string) {
-  return L.divIcon({
-    className: "",
-    html: `<div style="
-      width: 24px; height: 24px;
-      background: ${color};
-      border: 3px solid white;
-      border-radius: 50% 50% 50% 0;
-      transform: rotate(-45deg);
-      box-shadow: 0 2px 6px rgba(0,0,0,0.3);
-    "></div>`,
-    iconSize: [24, 24],
-    iconAnchor: [12, 24],
-    popupAnchor: [0, -26],
-  });
-}
-
 interface PenerimaItem {
   id: bigint;
   nama: string;
@@ -129,38 +102,53 @@ interface PenerimaItem {
   sudahDivalidasi: boolean;
 }
 
+interface LeafletMap {
+  remove(): void;
+}
+interface LeafletMarker {
+  remove(): void;
+}
+
 function MapComponent({ items }: { items: PenerimaItem[] }) {
   const mapRef = useRef<HTMLDivElement>(null);
-  const leafletMapRef = useRef<L.Map | null>(null);
-  const markersRef = useRef<L.Marker[]>([]);
+  const leafletMapRef = useRef<LeafletMap | null>(null);
+  const markersRef = useRef<LeafletMarker[]>([]);
 
   useEffect(() => {
     if (!mapRef.current) return;
     if (leafletMapRef.current) return;
 
-    const map = L.map(mapRef.current, {
-      center: [-2.5, 118.0],
-      zoom: 5,
-      zoomControl: true,
+    loadLeaflet().then((L) => {
+      if (!mapRef.current || leafletMapRef.current) return;
+
+      const map = L.map(mapRef.current, {
+        center: [-2.5, 118.0],
+        zoom: 5,
+        zoomControl: true,
+      });
+
+      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        attribution:
+          '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+        maxZoom: 18,
+      }).addTo(map);
+
+      leafletMapRef.current = map;
     });
 
-    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-      attribution:
-        '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-      maxZoom: 18,
-    }).addTo(map);
-
-    leafletMapRef.current = map;
-
     return () => {
-      map.remove();
-      leafletMapRef.current = null;
+      if (leafletMapRef.current) {
+        leafletMapRef.current.remove();
+        leafletMapRef.current = null;
+      }
     };
   }, []);
 
   useEffect(() => {
     const map = leafletMapRef.current;
-    if (!map) return;
+    if (!map || !window.L) return;
+
+    const L = window.L;
 
     // Remove old markers
     for (const m of markersRef.current) {
@@ -172,7 +160,6 @@ function MapComponent({ items }: { items: PenerimaItem[] }) {
       const coords = getCoords(p.wilayah, p.koordinatLat, p.koordinatLng);
       if (!coords) continue;
 
-      // Add small jitter to avoid perfect overlap
       const jitter: [number, number] = [
         coords[0] + (Math.random() - 0.5) * 0.02,
         coords[1] + (Math.random() - 0.5) * 0.02,
@@ -184,7 +171,22 @@ function MapComponent({ items }: { items: PenerimaItem[] }) {
         maximumFractionDigits: 0,
       }).format(Number(p.jumlahBantuan));
 
-      const icon = createColoredIcon(getMarkerColor(p.status));
+      const color = getMarkerColor(p.status);
+      const icon = L.divIcon({
+        className: "",
+        html: `<div style="
+          width: 24px; height: 24px;
+          background: ${color};
+          border: 3px solid white;
+          border-radius: 50% 50% 50% 0;
+          transform: rotate(-45deg);
+          box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+        "></div>`,
+        iconSize: [24, 24],
+        iconAnchor: [12, 24],
+        popupAnchor: [0, -26],
+      });
+
       const marker = L.marker(jitter, { icon })
         .bindPopup(
           `<div style="min-width:200px; font-family:sans-serif; font-size:13px;">
@@ -306,6 +308,173 @@ export default function PenerimaBantuan() {
     URL.revokeObjectURL(url);
   };
 
+  const handleRekapPDF = () => {
+    if (!filtered.length) return;
+
+    const totalNominal = filtered.reduce(
+      (sum, p) => sum + Number(p.jumlahBantuan),
+      0,
+    );
+    const menunggu = filtered.filter((p) => p.status === "menunggu").length;
+    const diproses = filtered.filter((p) => p.status === "diproses").length;
+    const didistribusikan = filtered.filter(
+      (p) => p.status === "didistribusikan",
+    ).length;
+    const sudahDivalidasi = filtered.filter((p) => p.sudahDivalidasi).length;
+
+    const tanggalCetak = new Intl.DateTimeFormat("id-ID", {
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    }).format(new Date());
+
+    const formatNum = (n: number) =>
+      new Intl.NumberFormat("id-ID", {
+        style: "currency",
+        currency: "IDR",
+        maximumFractionDigits: 0,
+      }).format(n);
+
+    const statusLabel = (s: string) => {
+      if (s === "menunggu") return "Menunggu";
+      if (s === "diproses") return "Diproses";
+      if (s === "didistribusikan") return "Didistribusikan";
+      return s;
+    };
+
+    const statusColor = (s: string) => {
+      if (s === "didistribusikan") return "#166534";
+      if (s === "diproses") return "#1e40af";
+      return "#92400e";
+    };
+
+    const statusBg = (s: string) => {
+      if (s === "didistribusikan") return "#dcfce7";
+      if (s === "diproses") return "#dbeafe";
+      return "#fef3c7";
+    };
+
+    const tableRows = filtered
+      .map(
+        (p, idx) => `
+      <tr style="background:${idx % 2 === 0 ? "#ffffff" : "#f8fafc"};">
+        <td style="padding:7px 10px;border:1px solid #dde3ea;text-align:center;color:#64748b;">${idx + 1}</td>
+        <td style="padding:7px 10px;border:1px solid #dde3ea;font-weight:600;color:#1e293b;">${p.nama}</td>
+        <td style="padding:7px 10px;border:1px solid #dde3ea;color:#475569;">${p.wilayah}</td>
+        <td style="padding:7px 10px;border:1px solid #dde3ea;color:#475569;">${p.jenisBantuan}</td>
+        <td style="padding:7px 10px;border:1px solid #dde3ea;text-align:right;color:#1e293b;">${formatCurrency(p.jumlahBantuan)}</td>
+        <td style="padding:7px 10px;border:1px solid #dde3ea;text-align:center;">
+          <span style="display:inline-block;padding:2px 10px;border-radius:12px;font-size:11px;font-weight:600;background:${statusBg(p.status)};color:${statusColor(p.status)};">${statusLabel(p.status)}</span>
+        </td>
+        <td style="padding:7px 10px;border:1px solid #dde3ea;text-align:center;color:${p.sudahDivalidasi ? "#15803d" : "#9ca3af"};">
+          ${p.sudahDivalidasi ? "✓ Sudah" : "✗ Belum"}
+        </td>
+        <td style="padding:7px 10px;border:1px solid #dde3ea;color:#64748b;font-size:12px;">${formatDate(p.tanggal)}</td>
+      </tr>
+    `,
+      )
+      .join("");
+
+    const html = `
+      <div id="penerima-rekap-overlay" style="
+        position:fixed;inset:0;z-index:99999;
+        background:#ffffff;overflow:auto;
+        padding:32px;box-sizing:border-box;
+        font-family:'Segoe UI',Arial,sans-serif;
+      ">
+        <!-- Header -->
+        <div style="border-bottom:3px solid #1a2e4a;padding-bottom:16px;margin-bottom:24px;">
+          <div style="display:flex;align-items:center;gap:14px;margin-bottom:8px;">
+            <img src="/assets/uploads/v-AbSTb_400x400-1--1.jpg"
+              onerror="this.style.display='none'"
+              style="width:52px;height:52px;object-fit:contain;border-radius:8px;" />
+            <div>
+              <h1 style="margin:0;font-size:22px;font-weight:800;color:#1a2e4a;letter-spacing:-0.5px;">
+                RTIK Indonesia Peduli
+              </h1>
+              <p style="margin:2px 0 0;font-size:13px;color:#64748b;">Rekap Data Penerima Bantuan</p>
+            </div>
+          </div>
+          <p style="margin:0;font-size:12px;color:#64748b;">Dicetak pada: ${tanggalCetak}</p>
+        </div>
+
+        <!-- Stats -->
+        <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:10px;margin-bottom:24px;">
+          <div style="border:1px solid #dde3ea;border-radius:8px;padding:12px;text-align:center;">
+            <div style="font-size:22px;font-weight:800;color:#1a2e4a;">${filtered.length}</div>
+            <div style="font-size:11px;color:#64748b;margin-top:2px;">Total Penerima</div>
+          </div>
+          <div style="border:1px solid #dde3ea;border-radius:8px;padding:12px;text-align:center;grid-column:span 2;">
+            <div style="font-size:18px;font-weight:800;color:#1a2e4a;">${formatNum(totalNominal)}</div>
+            <div style="font-size:11px;color:#64748b;margin-top:2px;">Total Nominal</div>
+          </div>
+          <div style="border:1px solid #fef3c7;border-radius:8px;padding:12px;text-align:center;background:#fffbeb;">
+            <div style="font-size:22px;font-weight:800;color:#92400e;">${menunggu}</div>
+            <div style="font-size:11px;color:#92400e;margin-top:2px;">Menunggu</div>
+          </div>
+          <div style="border:1px solid #dbeafe;border-radius:8px;padding:12px;text-align:center;background:#eff6ff;">
+            <div style="font-size:22px;font-weight:800;color:#1e40af;">${diproses}</div>
+            <div style="font-size:11px;color:#1e40af;margin-top:2px;">Diproses</div>
+          </div>
+          <div style="border:1px solid #dcfce7;border-radius:8px;padding:12px;text-align:center;background:#f0fdf4;">
+            <div style="font-size:22px;font-weight:800;color:#166534;">${didistribusikan}</div>
+            <div style="font-size:11px;color:#166534;margin-top:2px;">Didistribusikan</div>
+          </div>
+        </div>
+        <div style="margin-bottom:20px;padding:10px 14px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;font-size:13px;color:#166534;">
+          ✓ Sudah Divalidasi: <strong>${sudahDivalidasi}</strong> dari ${filtered.length} penerima
+        </div>
+
+        <!-- Table -->
+        <table style="width:100%;border-collapse:collapse;font-size:13px;">
+          <thead>
+            <tr style="background:#1a2e4a;color:#ffffff;">
+              <th style="padding:9px 10px;border:1px solid #1a2e4a;text-align:center;font-weight:700;width:40px;">No</th>
+              <th style="padding:9px 10px;border:1px solid #1a2e4a;text-align:left;font-weight:700;">Nama</th>
+              <th style="padding:9px 10px;border:1px solid #1a2e4a;text-align:left;font-weight:700;">Wilayah</th>
+              <th style="padding:9px 10px;border:1px solid #1a2e4a;text-align:left;font-weight:700;">Jenis Bantuan</th>
+              <th style="padding:9px 10px;border:1px solid #1a2e4a;text-align:right;font-weight:700;">Jumlah Bantuan</th>
+              <th style="padding:9px 10px;border:1px solid #1a2e4a;text-align:center;font-weight:700;">Status</th>
+              <th style="padding:9px 10px;border:1px solid #1a2e4a;text-align:center;font-weight:700;">Validasi</th>
+              <th style="padding:9px 10px;border:1px solid #1a2e4a;text-align:left;font-weight:700;">Tanggal</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${tableRows}
+          </tbody>
+        </table>
+
+        <!-- Footer -->
+        <div style="margin-top:24px;padding-top:12px;border-top:1px solid #dde3ea;text-align:center;font-size:11px;color:#94a3b8;">
+          Dicetak dari sistem RTIK Indonesia Peduli — rtik-indonesia-peduli.id
+        </div>
+      </div>
+    `;
+
+    const overlay = document.createElement("div");
+    overlay.innerHTML = html;
+    const overlayEl = overlay.firstElementChild as HTMLElement;
+    overlayEl.id = "penerima-rekap-overlay";
+    document.body.appendChild(overlayEl);
+
+    const originalBodyOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
+    const cleanup = () => {
+      document.body.style.overflow = originalBodyOverflow;
+      const el = document.getElementById("penerima-rekap-overlay");
+      if (el) el.remove();
+      window.removeEventListener("afterprint", cleanup);
+    };
+
+    window.addEventListener("afterprint", cleanup);
+    setTimeout(() => {
+      window.print();
+    }, 120);
+  };
+
   return (
     <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       {/* Header */}
@@ -319,17 +488,30 @@ export default function PenerimaBantuan() {
             Data Penerima Bantuan
           </h1>
         </div>
-        <Button
-          variant="outline"
-          size="sm"
-          className="gap-2"
-          onClick={handleExportCSV}
-          data-ocid="penerima.export.button"
-          disabled={!filtered.length}
-        >
-          <Download className="w-4 h-4" />
-          Export CSV
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            className="gap-2"
+            onClick={handleExportCSV}
+            data-ocid="penerima.export.button"
+            disabled={!filtered.length}
+          >
+            <Download className="w-4 h-4" />
+            Export CSV
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            className="gap-2 border-red-200 text-red-700 hover:bg-red-50 hover:border-red-300"
+            onClick={handleRekapPDF}
+            data-ocid="penerima.rekap_pdf.button"
+            disabled={!filtered.length}
+          >
+            <FileText className="w-4 h-4" />
+            Rekap PDF
+          </Button>
+        </div>
       </div>
 
       {/* Info bar */}

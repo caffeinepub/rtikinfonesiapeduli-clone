@@ -11,7 +11,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useGetAllPublikasi } from "@/hooks/useQueries";
 import { BookOpen, Calendar, Tag, User, X } from "lucide-react";
 import { useState } from "react";
-import type { T__1 } from "../backend.d";
+import type { T__2 } from "../backend.d";
 
 function formatDate(dateStr: string) {
   try {
@@ -35,7 +35,7 @@ const KATEGORI_COLORS: Record<string, string> = {
 
 export default function Publikasi() {
   const { data: publikasi, isLoading } = useGetAllPublikasi();
-  const [selectedItem, setSelectedItem] = useState<T__1 | null>(null);
+  const [selectedItem, setSelectedItem] = useState<T__2 | null>(null);
 
   return (
     <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -171,7 +171,7 @@ export default function Publikasi() {
 }
 
 interface PublikasiCardProps {
-  item: T__1;
+  item: T__2;
   index: number;
   onClick: () => void;
 }

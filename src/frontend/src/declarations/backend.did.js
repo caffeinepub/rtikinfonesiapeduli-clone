@@ -76,13 +76,13 @@ export const CreateInput = IDL.Record({
   'email' : IDL.Text,
   'wilayah' : IDL.Text,
 });
-export const T__4 = IDL.Record({
+export const T__5 = IDL.Record({
   'id' : IDL.Nat,
   'linkLabel' : IDL.Text,
   'linkUrl' : IDL.Text,
   'order' : IDL.Nat,
 });
-export const T__3 = IDL.Record({
+export const T__4 = IDL.Record({
   'id' : IDL.Nat,
   'status' : Status__1,
   'sudahDivalidasi' : IDL.Bool,
@@ -98,7 +98,7 @@ export const T__3 = IDL.Record({
   'keperluanBantuan' : IDL.Text,
   'catatan' : IDL.Text,
 });
-export const T__2 = IDL.Record({
+export const T__3 = IDL.Record({
   'id' : IDL.Nat,
   'status' : Status,
   'topik' : Topik,
@@ -109,7 +109,7 @@ export const T__2 = IDL.Record({
   'catatan' : IDL.Text,
   'kontak' : IDL.Text,
 });
-export const T__1 = IDL.Record({
+export const T__2 = IDL.Record({
   'id' : IDL.Nat,
   'penulis' : IDL.Text,
   'tanggal' : IDL.Text,
@@ -119,12 +119,20 @@ export const T__1 = IDL.Record({
   'gambarUrl' : IDL.Text,
   'konten' : IDL.Text,
 });
-export const T = IDL.Record({
+export const T__1 = IDL.Record({
   'id' : IDL.Nat,
   'aktif' : IDL.Bool,
   'nama' : IDL.Text,
   'email' : IDL.Text,
   'wilayah' : IDL.Text,
+});
+export const T = IDL.Record({
+  'alamat' : IDL.Text,
+  'deskripsi' : IDL.Text,
+  'email' : IDL.Text,
+  'telepon' : IDL.Text,
+  'namaOrganisasi' : IDL.Text,
+  'copyright' : IDL.Text,
 });
 export const UpdateInput__4 = IDL.Record({
   'id' : IDL.Nat,
@@ -188,28 +196,30 @@ export const idlService = IDL.Service({
   'deletePengaduan' : IDL.Func([IDL.Nat], [], []),
   'deletePublikasi' : IDL.Func([IDL.Nat], [], []),
   'deleteValidator' : IDL.Func([IDL.Nat], [], []),
-  'getAllFooterLinks' : IDL.Func([], [IDL.Vec(T__4)], ['query']),
-  'getAllPenerimaBantuan' : IDL.Func([], [IDL.Vec(T__3)], ['query']),
-  'getAllPengaduan' : IDL.Func([], [IDL.Vec(T__2)], ['query']),
-  'getAllPublikasi' : IDL.Func([], [IDL.Vec(T__1)], ['query']),
-  'getAllValidators' : IDL.Func([], [IDL.Vec(T)], ['query']),
-  'getFooterLinkById' : IDL.Func([IDL.Nat], [T__4], ['query']),
-  'getPenerimaBantuanById' : IDL.Func([IDL.Nat], [T__3], ['query']),
+  'getAllFooterLinks' : IDL.Func([], [IDL.Vec(T__5)], ['query']),
+  'getAllPenerimaBantuan' : IDL.Func([], [IDL.Vec(T__4)], ['query']),
+  'getAllPengaduan' : IDL.Func([], [IDL.Vec(T__3)], ['query']),
+  'getAllPublikasi' : IDL.Func([], [IDL.Vec(T__2)], ['query']),
+  'getAllValidators' : IDL.Func([], [IDL.Vec(T__1)], ['query']),
+  'getFooterInfo' : IDL.Func([], [T], ['query']),
+  'getFooterLinkById' : IDL.Func([IDL.Nat], [T__5], ['query']),
+  'getPenerimaBantuanById' : IDL.Func([IDL.Nat], [T__4], ['query']),
   'getPenerimaBantuanByJenis' : IDL.Func(
       [IDL.Text],
-      [IDL.Vec(T__3)],
+      [IDL.Vec(T__4)],
       ['query'],
     ),
   'getPenerimaBantuanByStatus' : IDL.Func(
       [Status__1],
-      [IDL.Vec(T__3)],
+      [IDL.Vec(T__4)],
       ['query'],
     ),
-  'getPengaduanById' : IDL.Func([IDL.Nat], [T__2], ['query']),
-  'getPublikasiById' : IDL.Func([IDL.Nat], [T__1], ['query']),
-  'getValidatorById' : IDL.Func([IDL.Nat], [T], ['query']),
+  'getPengaduanById' : IDL.Func([IDL.Nat], [T__3], ['query']),
+  'getPublikasiById' : IDL.Func([IDL.Nat], [T__2], ['query']),
+  'getValidatorById' : IDL.Func([IDL.Nat], [T__1], ['query']),
   'isAdmin' : IDL.Func([IDL.Text], [IDL.Bool], ['query']),
   'seedSampleData' : IDL.Func([], [], []),
+  'updateFooterInfo' : IDL.Func([T], [], []),
   'updateFooterLink' : IDL.Func([UpdateInput__4], [], []),
   'updatePenerimaBantuan' : IDL.Func([UpdateInput__3], [], []),
   'updatePengaduan' : IDL.Func([UpdateInput__2], [], []),
@@ -288,13 +298,13 @@ export const idlFactory = ({ IDL }) => {
     'email' : IDL.Text,
     'wilayah' : IDL.Text,
   });
-  const T__4 = IDL.Record({
+  const T__5 = IDL.Record({
     'id' : IDL.Nat,
     'linkLabel' : IDL.Text,
     'linkUrl' : IDL.Text,
     'order' : IDL.Nat,
   });
-  const T__3 = IDL.Record({
+  const T__4 = IDL.Record({
     'id' : IDL.Nat,
     'status' : Status__1,
     'sudahDivalidasi' : IDL.Bool,
@@ -310,7 +320,7 @@ export const idlFactory = ({ IDL }) => {
     'keperluanBantuan' : IDL.Text,
     'catatan' : IDL.Text,
   });
-  const T__2 = IDL.Record({
+  const T__3 = IDL.Record({
     'id' : IDL.Nat,
     'status' : Status,
     'topik' : Topik,
@@ -321,7 +331,7 @@ export const idlFactory = ({ IDL }) => {
     'catatan' : IDL.Text,
     'kontak' : IDL.Text,
   });
-  const T__1 = IDL.Record({
+  const T__2 = IDL.Record({
     'id' : IDL.Nat,
     'penulis' : IDL.Text,
     'tanggal' : IDL.Text,
@@ -331,12 +341,20 @@ export const idlFactory = ({ IDL }) => {
     'gambarUrl' : IDL.Text,
     'konten' : IDL.Text,
   });
-  const T = IDL.Record({
+  const T__1 = IDL.Record({
     'id' : IDL.Nat,
     'aktif' : IDL.Bool,
     'nama' : IDL.Text,
     'email' : IDL.Text,
     'wilayah' : IDL.Text,
+  });
+  const T = IDL.Record({
+    'alamat' : IDL.Text,
+    'deskripsi' : IDL.Text,
+    'email' : IDL.Text,
+    'telepon' : IDL.Text,
+    'namaOrganisasi' : IDL.Text,
+    'copyright' : IDL.Text,
   });
   const UpdateInput__4 = IDL.Record({
     'id' : IDL.Nat,
@@ -400,28 +418,30 @@ export const idlFactory = ({ IDL }) => {
     'deletePengaduan' : IDL.Func([IDL.Nat], [], []),
     'deletePublikasi' : IDL.Func([IDL.Nat], [], []),
     'deleteValidator' : IDL.Func([IDL.Nat], [], []),
-    'getAllFooterLinks' : IDL.Func([], [IDL.Vec(T__4)], ['query']),
-    'getAllPenerimaBantuan' : IDL.Func([], [IDL.Vec(T__3)], ['query']),
-    'getAllPengaduan' : IDL.Func([], [IDL.Vec(T__2)], ['query']),
-    'getAllPublikasi' : IDL.Func([], [IDL.Vec(T__1)], ['query']),
-    'getAllValidators' : IDL.Func([], [IDL.Vec(T)], ['query']),
-    'getFooterLinkById' : IDL.Func([IDL.Nat], [T__4], ['query']),
-    'getPenerimaBantuanById' : IDL.Func([IDL.Nat], [T__3], ['query']),
+    'getAllFooterLinks' : IDL.Func([], [IDL.Vec(T__5)], ['query']),
+    'getAllPenerimaBantuan' : IDL.Func([], [IDL.Vec(T__4)], ['query']),
+    'getAllPengaduan' : IDL.Func([], [IDL.Vec(T__3)], ['query']),
+    'getAllPublikasi' : IDL.Func([], [IDL.Vec(T__2)], ['query']),
+    'getAllValidators' : IDL.Func([], [IDL.Vec(T__1)], ['query']),
+    'getFooterInfo' : IDL.Func([], [T], ['query']),
+    'getFooterLinkById' : IDL.Func([IDL.Nat], [T__5], ['query']),
+    'getPenerimaBantuanById' : IDL.Func([IDL.Nat], [T__4], ['query']),
     'getPenerimaBantuanByJenis' : IDL.Func(
         [IDL.Text],
-        [IDL.Vec(T__3)],
+        [IDL.Vec(T__4)],
         ['query'],
       ),
     'getPenerimaBantuanByStatus' : IDL.Func(
         [Status__1],
-        [IDL.Vec(T__3)],
+        [IDL.Vec(T__4)],
         ['query'],
       ),
-    'getPengaduanById' : IDL.Func([IDL.Nat], [T__2], ['query']),
-    'getPublikasiById' : IDL.Func([IDL.Nat], [T__1], ['query']),
-    'getValidatorById' : IDL.Func([IDL.Nat], [T], ['query']),
+    'getPengaduanById' : IDL.Func([IDL.Nat], [T__3], ['query']),
+    'getPublikasiById' : IDL.Func([IDL.Nat], [T__2], ['query']),
+    'getValidatorById' : IDL.Func([IDL.Nat], [T__1], ['query']),
     'isAdmin' : IDL.Func([IDL.Text], [IDL.Bool], ['query']),
     'seedSampleData' : IDL.Func([], [], []),
+    'updateFooterInfo' : IDL.Func([T], [], []),
     'updateFooterLink' : IDL.Func([UpdateInput__4], [], []),
     'updatePenerimaBantuan' : IDL.Func([UpdateInput__3], [], []),
     'updatePengaduan' : IDL.Func([UpdateInput__2], [], []),

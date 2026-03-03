@@ -50,7 +50,9 @@ import {
   useGetAllPengaduan,
   useGetAllPublikasi,
   useGetAllValidators,
+  useGetFooterInfo,
   useSeedSampleData,
+  useUpdateFooterInfo,
   useUpdateFooterLink,
   useUpdatePenerimaBantuan,
   useUpdatePengaduan,
@@ -69,15 +71,18 @@ import {
   LogOut,
   MessageSquare,
   Plus,
+  Settings,
   Shield,
   Trash2,
+  Upload,
   UserCheck,
   Users,
+  X,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Status, type Status__1, type Topik } from "../backend.d";
-import type { T, T__1, T__2, T__3, T__4 } from "../backend.d";
+import type { T, T__1, T__2, T__3, T__4, T__5 } from "../backend.d";
 
 type TabId =
   | "penerima"
@@ -85,7 +90,8 @@ type TabId =
   | "publikasi"
   | "footer"
   | "validator"
-  | "laporan";
+  | "laporan"
+  | "pengaturan";
 
 function formatCurrency(amount: bigint) {
   return new Intl.NumberFormat("id-ID", {
@@ -142,6 +148,11 @@ export default function AdminPanel() {
       id: "laporan",
       label: "Laporan",
       icon: <BarChart2 className="w-4 h-4" />,
+    },
+    {
+      id: "pengaturan",
+      label: "Pengaturan Footer",
+      icon: <Settings className="w-4 h-4" />,
     },
   ];
 
@@ -202,6 +213,7 @@ export default function AdminPanel() {
       {activeTab === "footer" && <FooterLinksTab />}
       {activeTab === "validator" && <ValidatorTab />}
       {activeTab === "laporan" && <LaporanTab />}
+      {activeTab === "pengaturan" && <PengaturanFooterTab />}
     </main>
   );
 }
@@ -215,7 +227,7 @@ function PenerimaTab() {
   const deleteMutation = useDeletePenerimaBantuan();
 
   const [showForm, setShowForm] = useState(false);
-  const [editItem, setEditItem] = useState<T__3 | null>(null);
+  const [editItem, setEditItem] = useState<T__4 | null>(null);
   const [deleteId, setDeleteId] = useState<bigint | null>(null);
 
   const defaultForm = {
@@ -241,7 +253,7 @@ function PenerimaTab() {
     setShowForm(true);
   };
 
-  const openEdit = (item: T__3) => {
+  const openEdit = (item: T__4) => {
     setEditItem(item);
     setForm({
       nama: item.nama,
@@ -649,7 +661,7 @@ function PengaduanTab() {
   const deleteMutation = useDeletePengaduan();
 
   const [showAdd, setShowAdd] = useState(false);
-  const [editStatus, setEditStatus] = useState<T__2 | null>(null);
+  const [editStatus, setEditStatus] = useState<T__3 | null>(null);
   const [deleteId, setDeleteId] = useState<bigint | null>(null);
 
   const defaultForm = {
@@ -1041,8 +1053,10 @@ function PublikasiTab() {
   const deleteMutation = useDeletePublikasi();
 
   const [showForm, setShowForm] = useState(false);
-  const [editItem, setEditItem] = useState<T__1 | null>(null);
+  const [editItem, setEditItem] = useState<T__2 | null>(null);
   const [deleteId, setDeleteId] = useState<bigint | null>(null);
+  const [gambarFile, setGambarFile] = useState<File | null>(null);
+  const [gambarPreview, setGambarPreview] = useState<string>("");
 
   const defaultForm = {
     judul: "",
@@ -1058,9 +1072,11 @@ function PublikasiTab() {
   const openAdd = () => {
     setEditItem(null);
     setForm(defaultForm);
+    setGambarFile(null);
+    setGambarPreview("");
     setShowForm(true);
   };
-  const openEdit = (item: T__1) => {
+  const openEdit = (item: T__2) => {
     setEditItem(item);
     setForm({
       judul: item.judul,
@@ -1071,12 +1087,26 @@ function PublikasiTab() {
       gambarUrl: item.gambarUrl,
       penulis: item.penulis,
     });
+    setGambarFile(null);
+    setGambarPreview(item.gambarUrl);
     setShowForm(true);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const payload = { id: editItem?.id ?? BigInt(Date.now()), ...form };
+    let finalGambarUrl = form.gambarUrl;
+    if (gambarFile) {
+      finalGambarUrl = await new Promise<string>((resolve) => {
+        const reader = new FileReader();
+        reader.onload = (ev) => resolve(ev.target?.result as string);
+        reader.readAsDataURL(gambarFile);
+      });
+    }
+    const payload = {
+      id: editItem?.id ?? BigInt(Date.now()),
+      ...form,
+      gambarUrl: finalGambarUrl,
+    };
     try {
       if (editItem) {
         await updateMutation.mutateAsync(payload);
@@ -1284,14 +1314,54 @@ function PublikasiTab() {
                 />
               </FormField>
             </div>
-            <FormField label="URL Gambar">
-              <Input
-                value={form.gambarUrl}
-                onChange={(e) =>
-                  setForm((p) => ({ ...p, gambarUrl: e.target.value }))
-                }
-                placeholder="https://..."
-              />
+            <FormField label="Gambar">
+              <div className="space-y-2">
+                {gambarPreview ? (
+                  <div className="relative w-full h-32 rounded-lg overflow-hidden bg-muted">
+                    <img
+                      src={gambarPreview}
+                      alt="Preview"
+                      className="w-full h-full object-cover"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setGambarFile(null);
+                        setGambarPreview("");
+                        setForm((p) => ({ ...p, gambarUrl: "" }));
+                      }}
+                      className="absolute top-1 right-1 bg-black/50 text-white rounded-full p-0.5 hover:bg-black/70"
+                      data-ocid="admin_panel.publikasi.gambar.delete_button"
+                    >
+                      <X className="w-3 h-3" />
+                    </button>
+                  </div>
+                ) : null}
+                <label
+                  className="flex items-center gap-2 border-2 border-dashed border-border rounded-lg p-3 cursor-pointer hover:border-navy/50 hover:bg-muted/50 transition-colors"
+                  data-ocid="admin_panel.publikasi.gambar.upload_button"
+                >
+                  <Upload className="w-4 h-4 text-muted-foreground" />
+                  <span className="text-sm text-muted-foreground">
+                    {gambarFile
+                      ? gambarFile.name
+                      : "Klik untuk upload gambar..."}
+                  </span>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) {
+                        setGambarFile(file);
+                        const url = URL.createObjectURL(file);
+                        setGambarPreview(url);
+                      }
+                    }}
+                  />
+                </label>
+              </div>
             </FormField>
             <FormField label="Penulis">
               <Input
@@ -1366,13 +1436,13 @@ function FooterLinksTab() {
   const deleteMutation = useDeleteFooterLink();
 
   const [showForm, setShowForm] = useState(false);
-  const [editItem, setEditItem] = useState<T__4 | null>(null);
+  const [editItem, setEditItem] = useState<T__5 | null>(null);
   const [deleteId, setDeleteId] = useState<bigint | null>(null);
 
   const defaultForm = { linkLabel: "", linkUrl: "", order: "1" };
   const [form, setForm] = useState(defaultForm);
 
-  const openEdit = (item: T__4) => {
+  const openEdit = (item: T__5) => {
     setEditItem(item);
     setForm({
       linkLabel: item.linkLabel,
@@ -1619,13 +1689,13 @@ function ValidatorTab() {
   const deleteMutation = useDeleteValidator();
 
   const [showForm, setShowForm] = useState(false);
-  const [editItem, setEditItem] = useState<T | null>(null);
+  const [editItem, setEditItem] = useState<T__1 | null>(null);
   const [deleteId, setDeleteId] = useState<bigint | null>(null);
 
   const defaultForm = { nama: "", email: "", wilayah: "", aktif: true };
   const [form, setForm] = useState(defaultForm);
 
-  const openEdit = (item: T) => {
+  const openEdit = (item: T__1) => {
     setEditItem(item);
     setForm({
       nama: item.nama,
@@ -1967,6 +2037,191 @@ function LaporanTab() {
               </>
             )}
           </Button>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
+
+// ─── Pengaturan Footer Tab ────────────────────────────────────────────────────
+
+function PengaturanFooterTab() {
+  const { data: footerInfo, isLoading } = useGetFooterInfo();
+  const updateMutation = useUpdateFooterInfo();
+
+  const defaultForm = {
+    namaOrganisasi: "",
+    deskripsi: "",
+    alamat: "",
+    telepon: "",
+    email: "",
+    copyright: "",
+  };
+  const [form, setForm] = useState(defaultForm);
+  const [initialized, setInitialized] = useState(false);
+
+  useEffect(() => {
+    if (footerInfo && !initialized) {
+      setForm({
+        namaOrganisasi: footerInfo.namaOrganisasi,
+        deskripsi: footerInfo.deskripsi,
+        alamat: footerInfo.alamat,
+        telepon: footerInfo.telepon,
+        email: footerInfo.email,
+        copyright: footerInfo.copyright,
+      });
+      setInitialized(true);
+    }
+  }, [footerInfo, initialized]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      await updateMutation.mutateAsync(form);
+      toast.success("Pengaturan footer berhasil disimpan");
+    } catch {
+      toast.error("Gagal menyimpan pengaturan");
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <div
+        className="space-y-4"
+        data-ocid="admin_panel.pengaturan.loading_state"
+      >
+        {[1, 2, 3, 4, 5, 6].map((i) => (
+          <Skeleton key={i} className="h-10 w-full" />
+        ))}
+      </div>
+    );
+  }
+
+  return (
+    <div>
+      <div className="flex items-center gap-3 mb-6">
+        <div className="w-9 h-9 rounded-lg bg-navy/10 flex items-center justify-center">
+          <Settings className="w-5 h-5 text-navy" />
+        </div>
+        <div>
+          <h2 className="font-display font-semibold text-lg">
+            Pengaturan Footer
+          </h2>
+          <p className="text-xs text-muted-foreground">
+            Kelola informasi kontak dan deskripsi yang tampil di footer website
+          </p>
+        </div>
+      </div>
+
+      <Card className="max-w-2xl">
+        <CardContent className="p-6">
+          <form onSubmit={handleSubmit} className="space-y-5">
+            <FormField label="Nama Organisasi" required>
+              <Input
+                value={form.namaOrganisasi}
+                onChange={(e) =>
+                  setForm((p) => ({ ...p, namaOrganisasi: e.target.value }))
+                }
+                placeholder="RTIK Indonesia Peduli"
+                required
+                data-ocid="admin_panel.pengaturan.input"
+              />
+            </FormField>
+
+            <FormField label="Deskripsi">
+              <Textarea
+                value={form.deskripsi}
+                onChange={(e) =>
+                  setForm((p) => ({ ...p, deskripsi: e.target.value }))
+                }
+                rows={3}
+                placeholder="Deskripsi singkat organisasi yang tampil di footer..."
+                data-ocid="admin_panel.pengaturan.textarea"
+              />
+            </FormField>
+
+            <FormField label="Alamat">
+              <Input
+                value={form.alamat}
+                onChange={(e) =>
+                  setForm((p) => ({ ...p, alamat: e.target.value }))
+                }
+                placeholder="Alamat kantor / instansi..."
+                data-ocid="admin_panel.pengaturan.input"
+              />
+            </FormField>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <FormField label="Telepon">
+                <Input
+                  value={form.telepon}
+                  onChange={(e) =>
+                    setForm((p) => ({ ...p, telepon: e.target.value }))
+                  }
+                  placeholder="119 / 021-500-454"
+                />
+              </FormField>
+              <FormField label="Email">
+                <Input
+                  type="email"
+                  value={form.email}
+                  onChange={(e) =>
+                    setForm((p) => ({ ...p, email: e.target.value }))
+                  }
+                  placeholder="info@rtik.or.id"
+                />
+              </FormField>
+            </div>
+
+            <FormField label="Teks Copyright">
+              <Input
+                value={form.copyright}
+                onChange={(e) =>
+                  setForm((p) => ({ ...p, copyright: e.target.value }))
+                }
+                placeholder="RTIK Indonesia Peduli. Hak cipta dilindungi."
+              />
+            </FormField>
+
+            <div className="flex items-center justify-between pt-2 border-t border-border">
+              <p className="text-xs text-muted-foreground">
+                Perubahan akan langsung terlihat di footer website
+              </p>
+              <Button
+                type="submit"
+                className="bg-navy text-white hover:bg-navy-dark gap-2"
+                disabled={updateMutation.isPending}
+                data-ocid="admin_panel.pengaturan.submit_button"
+              >
+                {updateMutation.isPending ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" /> Menyimpan...
+                  </>
+                ) : (
+                  <>
+                    <Settings className="w-4 h-4" /> Simpan Pengaturan
+                  </>
+                )}
+              </Button>
+            </div>
+
+            {updateMutation.isSuccess && (
+              <p
+                className="text-sm text-green-600 font-medium"
+                data-ocid="admin_panel.pengaturan.success_state"
+              >
+                ✓ Pengaturan berhasil disimpan
+              </p>
+            )}
+            {updateMutation.isError && (
+              <p
+                className="text-sm text-red-600"
+                data-ocid="admin_panel.pengaturan.error_state"
+              >
+                Gagal menyimpan pengaturan. Silakan coba lagi.
+              </p>
+            )}
+          </form>
         </CardContent>
       </Card>
     </div>

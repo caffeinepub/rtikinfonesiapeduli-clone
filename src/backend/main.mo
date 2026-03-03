@@ -7,6 +7,8 @@ import List "mo:core/List";
 import Runtime "mo:core/Runtime";
 import Array "mo:core/Array";
 
+
+
 actor {
   module PenerimaBantuan {
     public type Status = {
@@ -224,11 +226,31 @@ actor {
     };
   };
 
+  module FooterInfo {
+    public type T = {
+      deskripsi : Text;
+      alamat : Text;
+      telepon : Text;
+      email : Text;
+      namaOrganisasi : Text;
+      copyright : Text;
+    };
+  };
+
   let penerimaBantuan = Map.empty<Nat, PenerimaBantuan.T>();
   let pengaduan = Map.empty<Nat, Pengaduan.T>();
   let publikasi = Map.empty<Nat, Publikasi.T>();
   let footerLink = Map.empty<Nat, FooterLink.T>();
   let validator = Map.empty<Nat, Validator.T>();
+
+  var footerInfo : FooterInfo.T = {
+    deskripsi = "Sistem Informasi RTIK Indonesia Peduli untuk data penerima bantuan bencana. Transparansi dan akuntabilitas dalam pengelolaan bantuan bencana.";
+    alamat = "Badan Penanggulangan Bencana Daerah";
+    telepon = "119 / 021-500-454";
+    email = "info@rtik.or.id";
+    namaOrganisasi = "RTIK Indonesia Peduli";
+    copyright = "RTIK Indonesia Peduli. Hak cipta dilindungi.";
+  };
 
   public shared ({ caller }) func addPenerimaBantuan(input : PenerimaBantuan.CreateInput) : async () {
     if (penerimaBantuan.containsKey(input.id)) {
@@ -501,5 +523,13 @@ actor {
     for (sample in samples.values()) {
       penerimaBantuan.add(sample.id, sample);
     };
+  };
+
+  public query ({ caller }) func getFooterInfo() : async FooterInfo.T {
+    footerInfo;
+  };
+
+  public shared ({ caller }) func updateFooterInfo(info : FooterInfo.T) : async () {
+    footerInfo := info;
   };
 };
