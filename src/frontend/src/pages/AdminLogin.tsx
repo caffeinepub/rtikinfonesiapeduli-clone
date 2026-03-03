@@ -9,7 +9,6 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useActor } from "@/hooks/useActor";
-import { useIsAdmin } from "@/hooks/useQueries";
 import { useNavigate } from "@tanstack/react-router";
 import { Eye, EyeOff, Loader2, LogIn, Shield } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -19,7 +18,7 @@ export default function AdminLogin() {
   const navigate = useNavigate();
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const isAdminMutation = useIsAdmin();
+  const [isLoggingIn, setIsLoggingIn] = useState(false);
   const { actor, isFetching } = useActor();
 
   useEffect(() => {
@@ -34,14 +33,14 @@ export default function AdminLogin() {
       toast.error("Masukkan password admin");
       return;
     }
-
     if (!actor) {
-      toast.error("Koneksi ke server belum siap. Mohon tunggu sebentar.");
+      toast.error("Menghubungkan ke server... Silakan coba lagi.");
       return;
     }
 
+    setIsLoggingIn(true);
     try {
-      const isAdmin = await isAdminMutation.mutateAsync(password);
+      const isAdmin = await actor.isAdmin(password);
       if (isAdmin) {
         sessionStorage.setItem("rtik_admin", "true");
         toast.success("Login berhasil! Selamat datang, Admin.");
@@ -52,8 +51,12 @@ export default function AdminLogin() {
       }
     } catch {
       toast.error("Terjadi kesalahan. Silakan coba lagi.");
+    } finally {
+      setIsLoggingIn(false);
     }
   };
+
+  const isPending = isLoggingIn;
 
   return (
     <main className="min-h-[70vh] flex items-center justify-center px-4">
@@ -111,18 +114,20 @@ export default function AdminLogin() {
                 </div>
               </div>
 
+              {isFetching && !actor && (
+                <p className="text-xs text-muted-foreground flex items-center gap-1.5">
+                  <Loader2 className="w-3 h-3 animate-spin" />
+                  Menghubungkan ke server...
+                </p>
+              )}
+
               <Button
                 type="submit"
                 className="w-full bg-navy text-white hover:bg-navy-dark"
-                disabled={isAdminMutation.isPending || isFetching || !actor}
+                disabled={isPending || (!actor && isFetching)}
                 data-ocid="admin.login.submit_button"
               >
-                {isFetching ? (
-                  <>
-                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                    Menghubungkan...
-                  </>
-                ) : isAdminMutation.isPending ? (
+                {isPending ? (
                   <>
                     <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                     Memverifikasi...

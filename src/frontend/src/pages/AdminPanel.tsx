@@ -74,10 +74,8 @@ import {
   Settings,
   Shield,
   Trash2,
-  Upload,
   UserCheck,
   Users,
-  X,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
@@ -1055,8 +1053,6 @@ function PublikasiTab() {
   const [showForm, setShowForm] = useState(false);
   const [editItem, setEditItem] = useState<T__2 | null>(null);
   const [deleteId, setDeleteId] = useState<bigint | null>(null);
-  const [gambarFile, setGambarFile] = useState<File | null>(null);
-  const [gambarPreview, setGambarPreview] = useState<string>("");
 
   const defaultForm = {
     judul: "",
@@ -1072,8 +1068,6 @@ function PublikasiTab() {
   const openAdd = () => {
     setEditItem(null);
     setForm(defaultForm);
-    setGambarFile(null);
-    setGambarPreview("");
     setShowForm(true);
   };
   const openEdit = (item: T__2) => {
@@ -1087,25 +1081,14 @@ function PublikasiTab() {
       gambarUrl: item.gambarUrl,
       penulis: item.penulis,
     });
-    setGambarFile(null);
-    setGambarPreview(item.gambarUrl);
     setShowForm(true);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    let finalGambarUrl = form.gambarUrl;
-    if (gambarFile) {
-      finalGambarUrl = await new Promise<string>((resolve) => {
-        const reader = new FileReader();
-        reader.onload = (ev) => resolve(ev.target?.result as string);
-        reader.readAsDataURL(gambarFile);
-      });
-    }
     const payload = {
       id: editItem?.id ?? BigInt(Date.now()),
       ...form,
-      gambarUrl: finalGambarUrl,
     };
     try {
       if (editItem) {
@@ -1314,54 +1297,15 @@ function PublikasiTab() {
                 />
               </FormField>
             </div>
-            <FormField label="Gambar">
-              <div className="space-y-2">
-                {gambarPreview ? (
-                  <div className="relative w-full h-32 rounded-lg overflow-hidden bg-muted">
-                    <img
-                      src={gambarPreview}
-                      alt="Preview"
-                      className="w-full h-full object-cover"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setGambarFile(null);
-                        setGambarPreview("");
-                        setForm((p) => ({ ...p, gambarUrl: "" }));
-                      }}
-                      className="absolute top-1 right-1 bg-black/50 text-white rounded-full p-0.5 hover:bg-black/70"
-                      data-ocid="admin_panel.publikasi.gambar.delete_button"
-                    >
-                      <X className="w-3 h-3" />
-                    </button>
-                  </div>
-                ) : null}
-                <label
-                  className="flex items-center gap-2 border-2 border-dashed border-border rounded-lg p-3 cursor-pointer hover:border-navy/50 hover:bg-muted/50 transition-colors"
-                  data-ocid="admin_panel.publikasi.gambar.upload_button"
-                >
-                  <Upload className="w-4 h-4 text-muted-foreground" />
-                  <span className="text-sm text-muted-foreground">
-                    {gambarFile
-                      ? gambarFile.name
-                      : "Klik untuk upload gambar..."}
-                  </span>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    className="hidden"
-                    onChange={(e) => {
-                      const file = e.target.files?.[0];
-                      if (file) {
-                        setGambarFile(file);
-                        const url = URL.createObjectURL(file);
-                        setGambarPreview(url);
-                      }
-                    }}
-                  />
-                </label>
-              </div>
+            <FormField label="URL Gambar">
+              <Input
+                value={form.gambarUrl}
+                onChange={(e) =>
+                  setForm((p) => ({ ...p, gambarUrl: e.target.value }))
+                }
+                placeholder="https://example.com/gambar.jpg"
+                data-ocid="admin_panel.publikasi.gambar_url.input"
+              />
             </FormField>
             <FormField label="Penulis">
               <Input

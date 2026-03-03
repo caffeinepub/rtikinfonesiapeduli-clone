@@ -132,19 +132,23 @@ export default function Publikasi() {
           </DialogHeader>
 
           {selectedItem?.gambarUrl && (
-            <div className="rounded-lg overflow-hidden bg-muted aspect-video flex items-center justify-center mb-2">
+            <div
+              className="w-full rounded-lg overflow-hidden bg-muted mb-4"
+              style={{ aspectRatio: "16/9" }}
+            >
               <img
                 src={selectedItem.gambarUrl}
                 alt={selectedItem.judul}
-                className="w-full h-full object-cover"
+                className="w-full h-full object-cover block"
                 onError={(e) => {
-                  (e.target as HTMLImageElement).style.display = "none";
+                  (e.target as HTMLImageElement).parentElement!.style.display =
+                    "none";
                 }}
               />
             </div>
           )}
 
-          <div className="prose prose-sm max-w-none text-foreground">
+          <div className="prose prose-sm max-w-none text-foreground clear-both">
             <p className="text-muted-foreground italic mb-4">
               {selectedItem?.ringkasan}
             </p>
