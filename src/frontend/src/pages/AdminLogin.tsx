@@ -8,18 +8,17 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useActor } from "@/hooks/useActor";
 import { useNavigate } from "@tanstack/react-router";
-import { Eye, EyeOff, Loader2, LogIn, Shield } from "lucide-react";
+import { Eye, EyeOff, LogIn, Shield } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
+
+const ADMIN_PASSWORD = "rtik2024";
 
 export default function AdminLogin() {
   const navigate = useNavigate();
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [isLoggingIn, setIsLoggingIn] = useState(false);
-  const { actor, isFetching } = useActor();
 
   useEffect(() => {
     if (sessionStorage.getItem("rtik_admin")) {
@@ -27,36 +26,22 @@ export default function AdminLogin() {
     }
   }, [navigate]);
 
-  const handleLogin = async (e: React.FormEvent) => {
+  const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
     if (!password) {
       toast.error("Masukkan password admin");
       return;
     }
-    if (!actor) {
-      toast.error("Menghubungkan ke server... Silakan coba lagi.");
-      return;
-    }
 
-    setIsLoggingIn(true);
-    try {
-      const isAdmin = await actor.isAdmin(password);
-      if (isAdmin) {
-        sessionStorage.setItem("rtik_admin", "true");
-        toast.success("Login berhasil! Selamat datang, Admin.");
-        navigate({ to: "/admin-panel" });
-      } else {
-        toast.error("Password salah. Silakan coba lagi.");
-        setPassword("");
-      }
-    } catch {
-      toast.error("Terjadi kesalahan. Silakan coba lagi.");
-    } finally {
-      setIsLoggingIn(false);
+    if (password === ADMIN_PASSWORD) {
+      sessionStorage.setItem("rtik_admin", "true");
+      toast.success("Login berhasil! Selamat datang, Admin.");
+      navigate({ to: "/admin-panel" });
+    } else {
+      toast.error("Password salah. Silakan coba lagi.");
+      setPassword("");
     }
   };
-
-  const isPending = isLoggingIn;
 
   return (
     <main className="min-h-[70vh] flex items-center justify-center px-4">
@@ -114,30 +99,13 @@ export default function AdminLogin() {
                 </div>
               </div>
 
-              {isFetching && !actor && (
-                <p className="text-xs text-muted-foreground flex items-center gap-1.5">
-                  <Loader2 className="w-3 h-3 animate-spin" />
-                  Menghubungkan ke server...
-                </p>
-              )}
-
               <Button
                 type="submit"
                 className="w-full bg-navy text-white hover:bg-navy-dark"
-                disabled={isPending || (!actor && isFetching)}
                 data-ocid="admin.login.submit_button"
               >
-                {isPending ? (
-                  <>
-                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                    Memverifikasi...
-                  </>
-                ) : (
-                  <>
-                    <LogIn className="w-4 h-4 mr-2" />
-                    Masuk ke Admin Panel
-                  </>
-                )}
+                <LogIn className="w-4 h-4 mr-2" />
+                Masuk ke Admin Panel
               </Button>
             </form>
           </CardContent>
